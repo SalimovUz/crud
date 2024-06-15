@@ -2,18 +2,19 @@ import React, { useState, useEffect } from "react";
 import { Modal, ModalBody, ModalHeader, ModalFooter, Button } from "reactstrap";
 import axios from "axios";
 
-const UserModal = (props) => {
-  const { open, toggle, user, setUsers, users } = props;
-  const [form, setForm] = useState({ name: "", email: "", number: "" });
+const UserModal = ({ open, toggle, user }) => {
+  const [form, setForm] = useState({
+    name: user.name || "",
+    email: user.email || "",
+    number: user.number || "",
+  });
 
   useEffect(() => {
-    if (user) {
-      setForm({
-        name: user.name || "",
-        email: user.email || "",
-        number: user.number || "",
-      });
-    }
+    setForm({
+      name: user.name || "",
+      email: user.email || "",
+      number: user.number || "",
+    });
   }, [user]);
 
   const handleChange = (e) => {
@@ -24,26 +25,33 @@ const UserModal = (props) => {
   const handleSubmit = (e) => {
     e.preventDefault();
 
+    const payload = {
+      name: form.name,
+      email: form.email,
+      number: form.number,
+    };
+
     if (!user.id) {
-      axios.post("http://localhost:3000/users", form).then((res) => {
-        if (res.status === 201) {
-          setUsers([...users, res.data]);
-          toggle();
-        }
-      });
+      axios
+        .post("http://localhost:3000/users", payload)
+        .then((res) => {
+          if (res.status === 201) {
+            toggle();
+          }
+        })
+        .catch((err) => {
+          console.log(err);
+        });
     } else {
-      const payload = {
-        name: form.name || user.name,
-        email: form.email || user.email,
-        number: form.number || user.number,
-      };
       axios
         .put(`http://localhost:3000/users/${user.id}`, payload)
         .then((res) => {
           if (res.status === 200) {
-            setUsers(users.map((u) => (u.id === user.id ? res.data : u)));
             toggle();
           }
+        })
+        .catch((err) => {
+          console.log(err);
         });
     }
   };
@@ -54,30 +62,33 @@ const UserModal = (props) => {
         <h1 className="text-center">{user.id ? "Edit User" : "Add User"}</h1>
       </ModalHeader>
       <ModalBody>
-        <form onSubmit={handleSubmit}>
+        <form onSubmit={handleSubmit} id="submit">
           <input
             type="text"
             placeholder="Name"
             name="name"
             className="form-control my-2"
-            onChange={handleChange}
             value={form.name}
+            onChange={handleChange}
+            required
           />
           <input
             type="email"
             placeholder="Email"
             name="email"
             className="form-control my-2"
-            onChange={handleChange}
             value={form.email}
+            onChange={handleChange}
+            required
           />
           <input
             type="text"
             placeholder="Number"
             name="number"
             className="form-control my-2"
-            onChange={handleChange}
             value={form.number}
+            onChange={handleChange}
+            required
           />
           <ModalFooter>
             <Button color="primary" type="submit">

@@ -1,6 +1,6 @@
 import axios from "axios";
 import React, { useEffect, useState } from "react";
-import UserModal from "../Modal";
+import Modal from "../Modal";
 
 const Index = () => {
   const [users, setUsers] = useState([]);
@@ -11,10 +11,10 @@ const Index = () => {
     axios
       .get("http://localhost:3000/users")
       .then((res) => {
+        console.log(res.data);
         if (res.status === 200) {
           setUsers(res.data);
         }
-        console.log(res.data);
       })
       .catch((err) => {
         console.log(err);
@@ -23,13 +23,15 @@ const Index = () => {
 
   const toggle = () => {
     setModal(!modal);
-    if (!modal) setUser({});
+    setUser({});
   };
 
   const deleteUser = (id) => {
     axios.delete(`http://localhost:3000/users/${id}`).then((res) => {
       if (res.status === 200) {
         setUsers(users.filter((user) => user.id !== id));
+        setModal(false);
+        setUser({});
       }
     });
   };
@@ -39,17 +41,15 @@ const Index = () => {
     setModal(true);
   };
 
+  const updateUser = (updatedUser) => {
+    setUsers(users.map((u) => (u.id === updatedUser.id ? updatedUser : u)));
+  };
+
   return (
     <>
-      <UserModal
-        open={modal}
-        toggle={toggle}
-        user={user}
-        setUsers={setUsers}
-        users={users}
-      />
+      <Modal open={modal} toggle={toggle} user={user} updateUser={updateUser} />
       <div className="container">
-        <h1 className="text-center my-3 font-semibold text-2xl">Users</h1>
+        <h1 className="text-center my-3">Users</h1>
         <button className="btn btn-success my-3" onClick={toggle}>
           Add User
         </button>
@@ -63,7 +63,6 @@ const Index = () => {
               <th>Action</th>
             </tr>
           </thead>
-
           <tbody>
             {users.map((item, index) => (
               <tr key={index}>
