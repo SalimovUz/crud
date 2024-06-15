@@ -37,6 +37,8 @@ const UserModal = ({ open, toggle, user }) => {
         .then((res) => {
           if (res.status === 201) {
             toggle();
+            window.location.reload();
+
           }
         })
         .catch((err) => {
@@ -48,6 +50,7 @@ const UserModal = ({ open, toggle, user }) => {
         .then((res) => {
           if (res.status === 200) {
             toggle();
+            window.location.reload();
           }
         })
         .catch((err) => {
